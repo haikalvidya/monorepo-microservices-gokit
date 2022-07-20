@@ -1,17 +1,17 @@
 package authservice
 
 import (
+	"context"
 	"sync"
 
-	"github.com/go-kit/kit/metrics"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 )
 
 type AuthService interface {
-	// GenerateToken(ctx context.Context, id int64, username, email, role string) (token string, err error)
-	// ParseToken(ctx context.Context, token string) (claims Claims, err error)
-	// DeleteToken(ctx context.Context, token string) (valid bool, err error)
+	GenerateToken(ctx context.Context, id int64, username, email, role string) (token string, err error)
+	ParseToken(ctx context.Context, token string) (claims Claims, err error)
+	DeleteToken(ctx context.Context, token string) (valid bool, err error)
 }
 
 type authservice struct {
@@ -20,20 +20,17 @@ type authservice struct {
 	logger *zap.Logger
 }
 
-func NewAuthService(db *redis.Client, logger *zap.Logger, ints metrics.Counter) {
+func NewAuthService(db *redis.Client) AuthService {
 	var svc AuthService
 	{
-		svc = newBasisService(db, logger)
-		svc = LoggingMiddleware(logger)(svc)
-		svc = InstrumentingMiddleware(ints)(svc)
+		svc = newBasisService(db)
 	}
 	return svc
 }
 
-func newBasisService(db *redis.Client, logger *zap.Logger) AuthService {
+func newBasisService(db *redis.Client) AuthService {
 	return &authservice{
-		db:     db,
-		logger: logger,
+		db: db,
 	}
 }
 
@@ -45,6 +42,17 @@ type Claims struct {
 	Role       string `json:"role"`
 }
 
-// func (as authservice) GenerateToken(ctx context.Context, id int64, username, email, role string) (token string, err error) {
+func (as authservice) GenerateToken(ctx context.Context, id int64, username, email, role string) (token string, err error) {
+	as.mtx.RLock()
+	defer as.mtx.RUnlock()
+}
 
-// }
+func (as authservice) ParseToken(ctx context.Context, token string) (claims Claims, err error) {
+	as.mtx.RLock()
+	defer as.mtx.RUnlock()
+}
+
+func (as authservice) DeleteToken(ctx context.Context, token string) (valid bool, err error) {
+	as.mtx.RLock()
+	defer as.mtx.RUnlock()
+}

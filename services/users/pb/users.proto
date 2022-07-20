@@ -1,0 +1,8 @@
+syntax = "proto3";
+package pb;
+
+service Users {
+    rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {}
+    rpc ParseToken (ParseTokenRequest) return (ParseTokenResponse) {}
+    rpc DeleteToken (DeleteTokenRequest) return (DeleteTokenResponse) {}
+}
